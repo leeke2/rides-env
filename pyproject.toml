@@ -1,0 +1,23 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "rides-env"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.8"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries"
+]
+dependencies = [
+    "gymnasium ~= 0.29.1",
+    "numpy ~= 1.26.2",
+    "tram ~= 0.1.7",
+    "scipy ~= 1.11.4",
+    "geopandas ~= 0.14.1",
+    "shapely ~= 2.0.2"
+]
+readme = "README.md"
