@@ -154,16 +154,9 @@ class LSSDPInstance:
         self._id = h.hexdigest()[:10]
 
     def print_summary(self) -> None:
-        if self.name is not None:
-            service = self.name.split("-")[0]
-            uri = f"https://busrouter.sg/#/services/{service}"
-            name = f"\033]8;;{uri}\033\\{self.name}\033]8;;\033\\"
-        else:
-            name = None
-
         print(
             f"  Instance  : {self._id}\n"
-            f"  Name      : {name}\n"
+            f"  Name      : {self.name}\n"
             f"  Buses     : {self.nbuses}\n"
             f"  Stops     : {self.travel_time.shape[0]}\n"
             f"  Capacity  : {self.capacity}\n"
