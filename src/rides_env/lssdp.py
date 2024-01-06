@@ -12,8 +12,10 @@ from .network import SGNetwork
 
 
 def calculate_stats(
-    arr: npt.NDArray, sum: bool = True
+    arr: npt.ArrayLike, sum: bool = True
 ) -> tuple[np.floating, np.floating, np.floating, np.floating]:
+    arr = np.array(arr)
+
     values = (
         arr[np.triu_indices_from(arr, k=1)]
         if arr.ndim == 2 and arr.shape[0] == arr.shape[1]
@@ -360,9 +362,7 @@ class LSSDPSolution:
     @property
     def stats(
         self,
-    ) -> dict[
-        str, tuple[np.floating, np.floating, np.floating, np.floating] | np.floating
-    ]:
+    ) -> dict[str, tuple[np.floating, np.floating, np.floating, np.floating]]:
         if not self._lss.is_valid():
             per_flow_exp = 0.0
         else:
@@ -372,12 +372,12 @@ class LSSDPSolution:
 
         return {
             "ttd": calculate_stats(self._ttd),
-            "per_flow_exp": per_flow_exp,
             "lf": calculate_stats(
                 np.divide(self._flow, self._capacities)
                 if self._inst.congested
                 else [float("nan")]
             ),
+            "per_flow_exp": calculate_stats([per_flow_exp]),
         }
 
     def terminate(self) -> None:

@@ -193,7 +193,7 @@ class RidesEnv(Env):
             stats = self._sol.stats
             _, ttd_mean, ttd_max, _ = stats["ttd"]
             _, lf_mean, lf_max, _ = stats["lf"]
-            per_flow_exp = stats["per_flow_exp"]
+            per_flow_exp, *_ = stats["per_flow_exp"]
 
             print(
                 f" {self._step:2d} "
