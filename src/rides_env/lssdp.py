@@ -9,6 +9,9 @@ from tram import mat_linear_assign, mat_linear_congested_assign
 
 from .entities import Service, StopSequence
 from .network import SGNetwork
+from math import ceil, floor
+
+
 
 
 def calculate_stats(
@@ -220,6 +223,8 @@ class LSSDPInstance:
         network: SGNetwork,
         nstops: int | list[int],
         nbuses: int | list[int],
+        min_headway: float,
+        max_headway: float,
         speed: Annotated[float, "kmh"],
         dwell_time: Annotated[float, "min"],
         demand_npeaks_max: int,
@@ -232,13 +237,6 @@ class LSSDPInstance:
         max_iters: int,
         rng: np.random.Generator,
     ) -> "LSSDPInstance":
-        # Generate fleet
-        inst_nbuses = (
-            nbuses
-            if isinstance(nbuses, int)
-            else rng.integers(nbuses[0], high=nbuses[1])
-        )
-
         # Generate travel time matrix
         # _, distance, info = network.sample_test_route()
         if isinstance(nstops, int):
@@ -252,6 +250,12 @@ class LSSDPInstance:
 
         travel_time = np.triu(distance / speed / 1000 * 60 + dwell_time, 1)
         inst_nstops = travel_time.shape[0]
+
+        ass_trip_time = trip_time(travel_time, StopSequence(list(range(inst_nstops))))
+        inst_nbuses = rng.integers(
+            ceil(ass_trip_time / max_headway),
+            high=floor(ass_trip_time / min_headway) + 1,
+        )
 
         # Generate demand matrix
         demand = rng.random(size=(inst_nstops, inst_nstops))
