@@ -5,7 +5,8 @@ import numpy as np
 import numpy.typing as npt
 from gymnasium import Env, spaces
 
-from .lssdp import LSSDPInstance, LSSDPSolution
+from .instance import LSSDPInstance
+from .solution import LSSDPSolution
 from .network import SGNetwork  # type: ignore
 
 ActType = int

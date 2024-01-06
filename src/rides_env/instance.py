@@ -1,38 +1,14 @@
-import hashlib
-from dataclasses import dataclass
-from typing import Annotated, Any
-
-import numpy as np
 import numpy.typing as npt
+import numpy as np
+from .utils import calculate_stats, trip_time
+from .entities import StopSequence
+from .network import SGNetwork
+import hashlib
+from typing import Annotated
+
+from math import ceil, floor
 from scipy.stats import multivariate_normal  # type: ignore
 from tram import mat_linear_assign, mat_linear_congested_assign
-
-from .entities import Service, StopSequence
-from .network import SGNetwork
-from math import ceil, floor
-
-
-def trip_time(travel_time: npt.NDArray, stops: StopSequence) -> float:
-    return sum(travel_time[from_][to_] for from_, to_ in zip(stops[:-1], stops[1:]))
-
-
-def calculate_stats(
-    arr: npt.ArrayLike, sum: bool = True
-) -> tuple[np.floating, np.floating, np.floating, np.floating]:
-    arr = np.array(arr)
-
-    values = (
-        arr[np.triu_indices_from(arr, k=1)]
-        if arr.ndim == 2 and arr.shape[0] == arr.shape[1]
-        else arr
-    )
-
-    return (
-        np.min(values),
-        np.mean(values),
-        np.max(values),
-        np.sum(values) if sum else float("nan"),
-    )
 
 
 class LSSDPInstance:
@@ -67,7 +43,7 @@ class LSSDPInstance:
 
         import matplotlib as mpl
         import matplotlib.pyplot as plt
-        from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
+        from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable  # type: ignore
 
         def nanlower(arr):
             arr[np.tril_indices(arr.shape[0])] = np.nan
@@ -129,7 +105,7 @@ class LSSDPInstance:
             _ = dem.text(
                 i - 2,
                 i,
-                i,
+                str(i),
                 rotation=-45,
                 horizontalalignment="center",
                 verticalalignment="center",
@@ -144,7 +120,7 @@ class LSSDPInstance:
             _ = tt.text(
                 i - 2,
                 i,
-                i,
+                str(i),
                 rotation=-45,
                 horizontalalignment="center",
                 verticalalignment="center",
@@ -332,116 +308,3 @@ class LSSDPInstance:
 
     def __hash__(self) -> int:
         return self._id.__hash__()
-
-
-class LSSDPSolution:
-    def __init__(self, inst: LSSDPInstance) -> None:
-        self._inst = inst
-
-        self._lss = Service(nstops=inst.nstops, nbuses=1)
-        self._prev_obj = 1.0
-        self._obj = 1.0
-        self._ttd = inst.base_ttd
-        self._flow = inst.base_flow
-        self._rel_ttd = np.triu(np.ones_like(self._ttd), 1)
-
-    @property
-    def _capacities(self) -> npt.NDArray[np.floating]:
-        if not self._lss.is_valid():
-            return np.array(
-                [self._inst.nbuses / self._inst.ass_trip_time * self._inst.capacity]
-                * 3
-                * (self._inst.nstops - 1)
-            )
-
-        return np.array(
-            (
-                [
-                    (self._inst.nbuses - self._lss.nbuses)
-                    / trip_time(self._inst.travel_time, self._lss.stops)
-                    * self._inst.capacity
-                ]
-                * 3
-                * (self._inst.nstops - 1)
-            )
-            + (
-                [self._lss.nbuses / self._inst.ass_trip_time * self._inst.capacity]
-                * 3
-                * (len(self._lss.stops) - 1)
-            )
-        )
-
-    @property
-    def stats(
-        self,
-    ) -> dict[str, tuple[np.floating, np.floating, np.floating, np.floating]]:
-        if not self._lss.is_valid():
-            per_flow_exp = 0.0
-        else:
-            per_flow_exp = (
-                self._flow[3 * (self._inst.nstops - 1) :].sum() / self._flow.sum()
-            )
-
-        return {
-            "ttd": calculate_stats(self._ttd),
-            "lf": calculate_stats(
-                np.divide(self._flow, self._capacities)
-                if self._inst.congested
-                else [float("nan")]
-            ),
-            "per_flow_exp": calculate_stats([per_flow_exp]),
-        }
-
-    def terminate(self) -> None:
-        self._prev_obj = self._obj
-
-    def toggle(self, stop: int) -> None:
-        self._lss.toggle(stop)
-        self._calculate_objective()
-
-    def add_bus(self) -> None:
-        self._lss.add_bus()
-        self._calculate_objective()
-
-    def _calculate_objective(self) -> None:
-        if not self._lss.is_valid():
-            self._prev_obj = self._obj
-            self._obj = 1.0
-            self._ttd = self._inst.base_ttd
-            self._rel_ttd = np.triu(np.ones_like(self._ttd), 1)
-
-            return
-
-        alignments = [self._inst.ass_stops.stops, self._lss.stops.stops]
-        frequencies = [
-            1.0 / self._inst.ass_trip_time * (self._inst.nbuses - self._lss.nbuses),
-            1.0 / trip_time(self._inst.travel_time, self._lss.stops) * self._lss.nbuses,
-        ]
-
-        if self._inst.congested:
-            out = mat_linear_congested_assign(
-                alignments,
-                frequencies,
-                self._inst.travel_time,
-                self._inst.demand,
-                self._inst.capacity,
-                max_iters=self._inst.max_iters,
-            )
-        else:
-            out = mat_linear_assign(
-                alignments,
-                frequencies,
-                self._inst.travel_time,
-                self._inst.demand,
-            )
-
-        self._prev_obj = self._obj
-        self._obj = out[2] / self._inst.base_obj
-        self._ttd = np.asarray(out[0], dtype=np.float32)
-        self._flow = np.asarray(out[1], dtype=np.float32)
-        self._rel_ttd = np.divide(
-            self._ttd,
-            self._inst.base_ttd,
-            out=np.zeros_like(self._inst.base_ttd),
-            where=(self._inst.base_ttd != 0),
-        )
