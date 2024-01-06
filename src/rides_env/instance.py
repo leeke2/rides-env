@@ -1,7 +1,7 @@
 import numpy.typing as npt
 import numpy as np
 from .utils import calculate_stats, trip_time
-from .entities import StopSequence
+from .entities import AllStopService
 from .network import SGNetwork
 import hashlib
 from typing import Annotated
@@ -35,6 +35,8 @@ class LSSDPInstance:
         self.base_obj = base_obj
         self.max_iters = max_iters
         self.name = name
+
+        self._oris = AllStopService(self.nstops, nbuses, travel_time, capacity)
 
         self._id: str = ""
 
@@ -149,7 +151,7 @@ class LSSDPInstance:
             f"  Name      : {self.name}\n"
             f"  Buses     : {self.nbuses}\n"
             f"  Stops     : {self.travel_time.shape[0]}\n"
-            f"  Headway   : {(self.ass_trip_time / self.nbuses):.1f} min\n"
+            f"  Headway   : {(1.0 / self._oris.frequency):.1f} min\n"
             f"  Capacity  : {self.capacity}\n"
             f"  Congested : {congested_str}\n"
             f"  Objective : {self.base_obj:.4f}\n"
@@ -169,11 +171,7 @@ class LSSDPInstance:
                 *calculate_stats(self.travel_time, sum=False),
                 *calculate_stats(self.base_ttd),
                 *calculate_stats(
-                    (
-                        self.base_flow
-                        / (self.nbuses / self.ass_trip_time * self.capacity)
-                        * 100
-                    )
+                    (self.base_flow / (self._oris.frequency * self.capacity) * 100)
                     if self.congested
                     else [float("nan")],
                     sum=False,
@@ -184,16 +182,6 @@ class LSSDPInstance:
     @property
     def nstops(self) -> int:
         return self.travel_time.shape[0]
-
-    # @cached_property
-    @property
-    def ass_stops(self) -> StopSequence:
-        return StopSequence(list(range(self.nstops)))
-
-    # @cached_property
-    @property
-    def ass_trip_time(self) -> float:
-        return trip_time(self.travel_time, self.ass_stops)
 
     @staticmethod
     def from_network(
@@ -228,7 +216,7 @@ class LSSDPInstance:
         travel_time = np.triu(distance / speed / 1000 * 60 + dwell_time, 1)
         inst_nstops = travel_time.shape[0]
 
-        ass_trip_time = trip_time(travel_time, StopSequence(list(range(inst_nstops))))
+        ass_trip_time = trip_time(travel_time, list(range(inst_nstops)))
         inst_nbuses = rng.integers(
             ceil(ass_trip_time / max_headway),
             high=floor(ass_trip_time / min_headway) + 1,
@@ -282,8 +270,8 @@ class LSSDPInstance:
 
         if congested:
             out = mat_linear_congested_assign(
-                [inst.ass_stops.stops],
-                [1 / inst.ass_trip_time * inst_nbuses],
+                [inst._oris.stops],
+                [inst._oris.frequency],
                 travel_time,
                 demand,
                 capacity,
@@ -291,8 +279,8 @@ class LSSDPInstance:
             )
         else:
             out = mat_linear_assign(
-                [inst.ass_stops.stops],
-                [1 / inst.ass_trip_time * inst_nbuses],
+                [inst._oris.stops],
+                [inst._oris.frequency],
                 travel_time,
                 demand,
             )

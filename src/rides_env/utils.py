@@ -1,6 +1,5 @@
 import numpy.typing as npt
 import numpy as np
-from .entities import StopSequence
 
 
 def calculate_stats(
@@ -22,5 +21,5 @@ def calculate_stats(
     )
 
 
-def trip_time(travel_time: npt.NDArray, stops: StopSequence) -> float:
+def trip_time(travel_time: npt.NDArray, stops: list[int]) -> float:
     return sum(travel_time[from_][to_] for from_, to_ in zip(stops[:-1], stops[1:]))

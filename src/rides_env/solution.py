@@ -3,7 +3,7 @@ import numpy as np
 from .utils import trip_time, calculate_stats
 
 from .instance import LSSDPInstance
-from .entities import LimitedStopService
+from .entities import LimitedStopService, AllStopService
 
 from tram import mat_linear_assign, mat_linear_congested_assign
 
@@ -12,7 +12,11 @@ class LSSDPSolution:
     def __init__(self, inst: LSSDPInstance) -> None:
         self._inst = inst
 
-        self._lss = LimitedStopService(nstops=inst.nstops, nbuses=1)
+        self._ass = AllStopService(
+            inst.nstops, inst.nbuses - 1, inst.travel_time, inst.capacity
+        )
+        self._lss = LimitedStopService(inst.nstops, 1, inst.travel_time, inst.capacity)
+
         self._prev_obj = 1.0
         self._obj = 1.0
         self._ttd = inst.base_ttd
@@ -22,27 +26,11 @@ class LSSDPSolution:
     @property
     def _capacities(self) -> npt.NDArray[np.floating]:
         if not self._lss.is_valid():
-            return np.array(
-                [self._inst.nbuses / self._inst.ass_trip_time * self._inst.capacity]
-                * 3
-                * (self._inst.nstops - 1)
-            )
+            return np.array([self._inst._oris.max_load] * 3 * (self._inst.nstops - 1))
 
         return np.array(
-            (
-                [
-                    (self._inst.nbuses - self._lss.nbuses)
-                    / trip_time(self._inst.travel_time, self._lss.stops)
-                    * self._inst.capacity
-                ]
-                * 3
-                * (self._inst.nstops - 1)
-            )
-            + (
-                [self._lss.nbuses / self._inst.ass_trip_time * self._inst.capacity]
-                * 3
-                * (len(self._lss.stops) - 1)
-            )
+            ([self._ass.max_load] * 3 * (self._ass.nstops - 1))
+            + ([self._lss.max_load] * 3 * (self._lss.nstops - 1))
         )
 
     @property
@@ -53,7 +41,7 @@ class LSSDPSolution:
             per_flow_exp = 0.0
         else:
             per_flow_exp = (
-                self._flow[3 * (self._inst.nstops - 1) :].sum() / self._flow.sum()
+                self._flow[3 * (self._ass.nstops - 1) :].sum() / self._flow.sum()
             )
 
         return {
@@ -74,6 +62,7 @@ class LSSDPSolution:
         self._calculate_objective()
 
     def add_bus(self) -> None:
+        self._ass.remove_bus()
         self._lss.add_bus()
         self._calculate_objective()
 
@@ -86,11 +75,8 @@ class LSSDPSolution:
 
             return
 
-        alignments = [self._inst.ass_stops.stops, self._lss.stops.stops]
-        frequencies = [
-            1.0 / self._inst.ass_trip_time * (self._inst.nbuses - self._lss.nbuses),
-            1.0 / trip_time(self._inst.travel_time, self._lss.stops) * self._lss.nbuses,
-        ]
+        alignments = [self._ass.stops, self._lss.stops]
+        frequencies = [self._ass.frequency, self._lss.frequency]
 
         if self._inst.congested:
             out = mat_linear_congested_assign(

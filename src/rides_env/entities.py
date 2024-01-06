@@ -1,30 +1,36 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod, abstractproperty
+import numpy.typing as npt
 
 
-@dataclass
-class StopSequence:
-    stops: list[int]
+# @dataclass
+# class StopSequence:
+#     stops: list[int]
 
-    def __len__(self) -> int:
-        return self.stops.__len__()
+#     def __len__(self) -> int:
+#         return self.stops.__len__()
 
-    def __hash__(self) -> int:
-        return tuple(self.stops).__hash__()
+#     def __hash__(self) -> int:
+#         return tuple(self.stops).__hash__()
 
-    def __getitem__(self, index):
-        return self.stops.__getitem__(index)
+#     def __getitem__(self, index):
+#         return self.stops.__getitem__(index)
 
 
 class Service(ABC):
-    def __init__(self, nstops: int, nbuses: int):
+    def __init__(
+        self, nstops: int, nbuses: int, travel_time_mat: npt.NDArray, capacity: int
+    ):
         self._nbuses = nbuses
         self._nstops = nstops
+
+        self._travel_time = travel_time_mat
+        self._capacity = capacity
 
         self._last_stop = -1
 
     @abstractproperty
-    def stops(self) -> StopSequence:
+    def stops(self) -> list[int]:
         raise NotImplementedError()
 
     @property
@@ -32,35 +38,44 @@ class Service(ABC):
         return self._nbuses
 
     @property
+    def trip_time(self) -> float:
+        return sum(
+            self._travel_time[from_][to_]
+            for from_, to_ in zip(self.stops[:-1], self.stops[1:])
+        )
+
+    @property
+    def frequency(self) -> float:
+        return self.nbuses / self.trip_time
+
+    @property
+    def max_load(self) -> float:
+        return self.frequency * self._capacity
+
+    @property
     def last_stop(self) -> int:
         return self._last_stop
 
+    @property
+    def nstops(self) -> int:
+        return len(self.stops)
+
     def is_valid(self) -> bool:
         return len(self.stops) >= 2 and self.nbuses >= 1
-
-    def add_bus(self) -> None:
-        self._nbuses += 1
-
-    def remove_bus(self) -> None:
-        self._nbuses -= 1
 
     @abstractmethod
     def is_serving(self, stop: int) -> bool:
         raise NotImplementedError()
 
-    @abstractmethod
-    def toggle(self, stop: int) -> None:
-        raise NotImplementedError()
-
 
 class AllStopService(Service):
     def __init__(self, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        self._stops = StopSequence(list(range(self._nstops)))
+        self._stops = list(range(self._nstops))
 
     @property
-    def stops(self) -> StopSequence:
+    def stops(self) -> list[int]:
         return self._stops
 
     def is_serving(self, stop: int) -> bool:
@@ -69,18 +84,19 @@ class AllStopService(Service):
     def not_serving_any_stops(self) -> bool:
         return False
 
+    def remove_bus(self) -> None:
+        self._nbuses -= 1
+
 
 class LimitedStopService(Service):
     def __init__(self, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._stops_binary = [False for stop in range(self._nstops)]
 
     @property
-    def stops(self) -> StopSequence:
-        return StopSequence(
-            [i for i, served in enumerate(self._stops_binary) if served]
-        )
+    def stops(self) -> list[int]:
+        return [i for i, served in enumerate(self._stops_binary) if served]
 
     @property
     def stops_binary(self) -> list[bool]:
@@ -91,6 +107,9 @@ class LimitedStopService(Service):
 
     def not_serving_any_stops(self) -> bool:
         return sum(self._stops_binary) == 0
+
+    def add_bus(self) -> None:
+        self._nbuses += 1
 
     def toggle(self, stop: int) -> None:
         self._stops_binary[stop] = False if self._stops_binary[stop] else True
