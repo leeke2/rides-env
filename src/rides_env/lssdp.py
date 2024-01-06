@@ -193,7 +193,11 @@ class LSSDPInstance:
                 *calculate_stats(self.travel_time, sum=False),
                 *calculate_stats(self.base_ttd),
                 *calculate_stats(
-                    self.base_flow / self.nbuses / self.capacity * 100
+                    (
+                        self.base_flow
+                        / (self.nbuses / self.ass_trip_time * self.capacity)
+                        * 100
+                    )
                     if self.congested
                     else [float("nan")],
                     sum=False,
@@ -344,17 +348,23 @@ class LSSDPSolution:
     def _capacities(self) -> npt.NDArray[np.floating]:
         if not self._lss.is_valid():
             return np.array(
-                [self._inst.nbuses * self._inst.capacity] * 3 * (self._inst.nstops - 1)
+                [self._inst.nbuses / self._inst.ass_trip_time * self._inst.capacity]
+                * 3
+                * (self._inst.nstops - 1)
             )
 
         return np.array(
             (
-                [(self._inst.nbuses - self._lss.nbuses) * self._inst.capacity]
+                [
+                    (self._inst.nbuses - self._lss.nbuses)
+                    / trip_time(self._inst.travel_time, self._lss.stops)
+                    * self._inst.capacity
+                ]
                 * 3
                 * (self._inst.nstops - 1)
             )
             + (
-                [self._lss.nbuses * self._inst.capacity]
+                [self._lss.nbuses / self._inst.ass_trip_time * self._inst.capacity]
                 * 3
                 * (len(self._lss.stops) - 1)
             )
