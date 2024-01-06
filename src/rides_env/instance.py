@@ -197,7 +197,6 @@ class LSSDPInstance:
         demand_peak_size: float,
         congested: bool,
         capacity: float,
-        max_od_demand: float,
         truncate: bool,
         max_iters: int,
         rng: np.random.Generator,
@@ -242,15 +241,11 @@ class LSSDPInstance:
                 demand += rng.random() * rv.pdf(pos) * demand_peak_size
 
         demand = np.triu(demand, 1)
-        demand *= (
-            # rng.random()
-            1.0
-            * max_od_demand
-            / (inst_nstops + 1 - np.arange(inst_nstops).reshape(-1, 1))
-        )
-
+        demand /= inst_nstops + 1 - np.arange(inst_nstops).reshape(-1, 1)
         demand /= np.sum(demand)
-        demand *= inst_nbuses * capacity * (rng.random() * 0.5 + 0.5) / 60.0
+        demand *= (
+            inst_nbuses / ass_trip_time * capacity * 1.5 * (rng.random() * 0.5 + 0.5)
+        )
 
         inst = LSSDPInstance(
             travel_time=travel_time.astype(np.float32),
