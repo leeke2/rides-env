@@ -56,8 +56,8 @@ class RidesEnv(Env):
         self,
         nstops: int | list[int] = [30, 45],
         nbuses: int | list[int] = [5, 20],
-        min_headway: Annotated[float, 'min'] = 3.0,
-        max_headway: Annotated[float, 'min'] = 15.0,
+        min_headway: Annotated[float, "min"] = 3.0,
+        max_headway: Annotated[float, "min"] = 15.0,
         nbuses_full_min: int = 1,
         truncate: bool = True,
         capacity: int | None = 90,
@@ -74,7 +74,7 @@ class RidesEnv(Env):
     ):
         self._nstops = nstops
         self._nbuses = nbuses
-        self._min_headway = min_headway,
+        self._min_headway = min_headway
         self._max_headway = max_headway
         self._nbuses_full_min = nbuses_full_min
         self._truncate = truncate
