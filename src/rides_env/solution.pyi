@@ -11,6 +11,7 @@ class LSSDPSolution:
     _inst: LSSDPInstance
     _ass: AllStopService
     _lss: LimitedStopService
+    _obj: float
     _prev_obj: float
     _ttd: npt.NDArray[np.floating]
     _flow: npt.NDArray[np.floating]
