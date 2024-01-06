@@ -3,7 +3,7 @@ import numpy as np
 from .utils import trip_time, calculate_stats
 
 from .instance import LSSDPInstance
-from .entities import Service
+from .entities import LimitedStopService
 
 from tram import mat_linear_assign, mat_linear_congested_assign
 
@@ -12,7 +12,7 @@ class LSSDPSolution:
     def __init__(self, inst: LSSDPInstance) -> None:
         self._inst = inst
 
-        self._lss = Service(nstops=inst.nstops, nbuses=1)
+        self._lss = LimitedStopService(nstops=inst.nstops, nbuses=1)
         self._prev_obj = 1.0
         self._obj = 1.0
         self._ttd = inst.base_ttd

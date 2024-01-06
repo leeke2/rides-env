@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from abc import ABC, abstractmethod, abstractproperty
 
 
 @dataclass
@@ -15,40 +16,92 @@ class StopSequence:
         return self.stops.__getitem__(index)
 
 
-class Service:
+class Service(ABC):
     def __init__(self, nstops: int, nbuses: int):
-        self.stops_binary = [False for stop in range(nstops)]
-        self.nbuses = nbuses
-        self.nstops = nstops
+        self._nbuses = nbuses
+        self._nstops = nstops
 
-        self.last_stop = -1
+        self._last_stop = -1
+
+    @abstractproperty
+    def stops(self) -> StopSequence:
+        raise NotImplementedError()
+
+    @property
+    def nbuses(self) -> int:
+        return self._nbuses
+
+    @property
+    def last_stop(self) -> int:
+        return self._last_stop
+
+    def is_valid(self) -> bool:
+        return len(self.stops) >= 2 and self.nbuses >= 1
+
+    def add_bus(self) -> None:
+        self._nbuses += 1
+
+    def remove_bus(self) -> None:
+        self._nbuses -= 1
+
+    @abstractmethod
+    def is_serving(self, stop: int) -> bool:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def toggle(self, stop: int) -> None:
+        raise NotImplementedError()
+
+
+class AllStopService(Service):
+    def __init__(self, *args, **kwargs):
+        super.__init__(*args, **kwargs)
+
+        self._stops = StopSequence(list(range(self._nstops)))
 
     @property
     def stops(self) -> StopSequence:
-        return StopSequence([i for i, served in enumerate(self.stops_binary) if served])
-
-    def is_valid(self) -> bool:
-        return sum(self.stops_binary) >= 2 and self.nbuses >= 1
+        return self._stops
 
     def is_serving(self, stop: int) -> bool:
-        return self.stops_binary[stop]
+        return stop < self._nstops
 
     def not_serving_any_stops(self) -> bool:
-        return sum(self.stops_binary) == 0
+        return False
 
-    def add_bus(self) -> None:
-        self.nbuses += 1
+
+class LimitedStopService(Service):
+    def __init__(self, *args, **kwargs):
+        super.__init__(*args, **kwargs)
+
+        self._stops_binary = [False for stop in range(self._nstops)]
+
+    @property
+    def stops(self) -> StopSequence:
+        return StopSequence(
+            [i for i, served in enumerate(self._stops_binary) if served]
+        )
+
+    @property
+    def stops_binary(self) -> list[bool]:
+        return self._stops_binary
+
+    def is_serving(self, stop: int) -> bool:
+        return self._stops_binary[stop]
+
+    def not_serving_any_stops(self) -> bool:
+        return sum(self._stops_binary) == 0
 
     def toggle(self, stop: int) -> None:
-        self.stops_binary[stop] = False if self.stops_binary[stop] else True
+        self._stops_binary[stop] = False if self._stops_binary[stop] else True
 
-        if stop >= self.last_stop:
-            if self.stops_binary[stop]:
-                self.last_stop = stop
-            elif sum(self.stops_binary) == 0:
-                self.last_stop = -1
+        if stop >= self._last_stop:
+            if self._stops_binary[stop]:
+                self._last_stop = stop
+            elif sum(self._stops_binary) == 0:
+                self._last_stop = -1
             else:
-                for i in range(self.last_stop, -1, -1):
-                    if self.stops_binary[i]:
-                        self.last_stop = i
+                for i in range(self._last_stop, -1, -1):
+                    if self._stops_binary[i]:
+                        self._last_stop = i
                         break
