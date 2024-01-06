@@ -59,7 +59,7 @@ class RidesEnv(Env):
         max_headway: Annotated[float, "min"] = 15.0,
         nbuses_full_min: int = 1,
         truncate: bool = True,
-        capacity: int | None = 90,
+        capacity: float | None = 90.0,
         congested: bool = True,
         speed: Annotated[float, "kmh"] = 17.0,
         dwell_time: Annotated[float, "min"] = 0.5,

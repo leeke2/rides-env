@@ -19,7 +19,7 @@ import numpy.typing as npt
 
 class Service(ABC):
     def __init__(
-        self, nstops: int, nbuses: int, travel_time_mat: npt.NDArray, capacity: int
+        self, nstops: int, nbuses: int, travel_time_mat: npt.NDArray, capacity: float
     ):
         self._nbuses = nbuses
         self._nstops = nstops
