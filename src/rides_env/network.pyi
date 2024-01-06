@@ -1,4 +1,5 @@
 from typing import Optional
+
 import numpy as np
 
 def idx_max(lst, skip: int = 0): ...

@@ -1,11 +1,11 @@
-import numpy.typing as npt
 import numpy as np
-from .entities import (
-    AllStopService as AllStopService,
-    LimitedStopService as LimitedStopService,
-)
+import numpy.typing as npt
+
+from .entities import AllStopService as AllStopService
+from .entities import LimitedStopService as LimitedStopService
 from .instance import LSSDPInstance as LSSDPInstance
-from .utils import calculate_stats as calculate_stats, trip_time as trip_time
+from .utils import calculate_stats as calculate_stats
+from .utils import trip_time as trip_time
 
 class LSSDPSolution:
     _inst: LSSDPInstance

@@ -1,8 +1,10 @@
+from typing import Annotated, Any
+
+from gymnasium import Env, spaces
+
 from .instance import LSSDPInstance as LSSDPInstance
 from .network import SGNetwork as SGNetwork
 from .solution import LSSDPSolution as LSSDPSolution
-from gymnasium import Env, spaces
-from typing import Annotated, Any
 
 ActType = int
 ObsType = dict[str, Any]

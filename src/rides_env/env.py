@@ -6,8 +6,8 @@ import numpy.typing as npt
 from gymnasium import Env, spaces
 
 from .instance import LSSDPInstance
-from .solution import LSSDPSolution
 from .network import SGNetwork  # type: ignore
+from .solution import LSSDPSolution
 
 ActType = int
 ObsType = dict[str, Any]

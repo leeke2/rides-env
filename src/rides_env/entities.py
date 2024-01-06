@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod, abstractproperty
-import numpy.typing as npt
+from dataclasses import dataclass
 
+import numpy.typing as npt
 
 # @dataclass
 # class StopSequence:

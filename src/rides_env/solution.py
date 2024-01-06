@@ -1,11 +1,10 @@
-import numpy.typing as npt
 import numpy as np
-from .utils import trip_time, calculate_stats
-
-from .instance import LSSDPInstance
-from .entities import LimitedStopService, AllStopService
-
+import numpy.typing as npt
 from tram import mat_linear_assign, mat_linear_congested_assign
+
+from .entities import AllStopService, LimitedStopService
+from .instance import LSSDPInstance
+from .utils import calculate_stats, trip_time
 
 
 class LSSDPSolution:

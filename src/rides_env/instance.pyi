@@ -1,9 +1,12 @@
+from typing import Annotated
+
 import numpy as np
 import numpy.typing as npt
+
 from .entities import AllStopService as AllStopService
 from .network import SGNetwork as SGNetwork
-from .utils import calculate_stats as calculate_stats, trip_time as trip_time
-from typing import Annotated
+from .utils import calculate_stats as calculate_stats
+from .utils import trip_time as trip_time
 
 class LSSDPInstance:
     travel_time: npt.NDArray[np.floating]

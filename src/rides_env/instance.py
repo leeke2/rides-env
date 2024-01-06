@@ -1,14 +1,15 @@
-import numpy.typing as npt
-import numpy as np
-from .utils import calculate_stats, trip_time
-from .entities import AllStopService
-from .network import SGNetwork
 import hashlib
+from math import ceil, floor
 from typing import Annotated
 
-from math import ceil, floor
+import numpy as np
+import numpy.typing as npt
 from scipy.stats import multivariate_normal  # type: ignore
 from tram import mat_linear_assign, mat_linear_congested_assign
+
+from .entities import AllStopService
+from .network import SGNetwork
+from .utils import calculate_stats, trip_time
 
 
 class LSSDPInstance:
@@ -45,7 +46,8 @@ class LSSDPInstance:
 
         import matplotlib as mpl
         import matplotlib.pyplot as plt
-        from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable  # type: ignore
+        from mpl_toolkits.axes_grid1.axes_divider import \
+            make_axes_locatable  # type: ignore
 
         def nanlower(arr):
             arr[np.tril_indices(arr.shape[0])] = np.nan

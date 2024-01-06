@@ -1,7 +1,8 @@
 import abc
-import numpy.typing as npt
 from abc import ABC, abstractmethod
 from dataclasses import dataclass as dataclass
+
+import numpy.typing as npt
 
 class Service(ABC, metaclass=abc.ABCMeta):
     def __init__(
