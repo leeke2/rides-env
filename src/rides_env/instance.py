@@ -187,7 +187,6 @@ class LSSDPInstance:
     def from_network(
         network: SGNetwork,
         nstops: int | list[int],
-        nbuses: int | list[int],
         min_headway: float,
         max_headway: float,
         speed: Annotated[float, "kmh"],

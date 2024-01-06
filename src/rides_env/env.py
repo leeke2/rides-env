@@ -55,7 +55,6 @@ class RidesEnv(Env):
     def __init__(
         self,
         nstops: int | list[int] = [30, 45],
-        nbuses: int | list[int] = [5, 20],
         min_headway: Annotated[float, "min"] = 3.0,
         max_headway: Annotated[float, "min"] = 15.0,
         nbuses_full_min: int = 1,
@@ -72,7 +71,6 @@ class RidesEnv(Env):
         render_mode: str | None = None,
     ):
         self._nstops = nstops
-        self._nbuses = nbuses
         self._min_headway = min_headway
         self._max_headway = max_headway
         self._nbuses_full_min = nbuses_full_min
@@ -101,7 +99,7 @@ class RidesEnv(Env):
                 "od_demand": _mat(10.0),
                 "stops_exp": _oh(self._nstops_max),
                 "nbuses_exp": spaces.Discrete(
-                    self._nbuses_max - self._nbuses_full_min,
+                    100,
                     start=self._nbuses_full_min,
                 ),
                 "link_travel_time": _mat(120.0),
@@ -361,13 +359,6 @@ class RidesEnv(Env):
         return self._nstops[1]
 
     @property
-    def _nbuses_max(self) -> int:
-        if isinstance(self._nbuses, int):
-            return self._nbuses
-
-        return self._nbuses[1]
-
-    @property
     def _add_bus_action(self) -> int:
         return self._nactions - 1
 
@@ -390,7 +381,6 @@ class RidesEnv(Env):
         self._inst = LSSDPInstance.from_network(
             self._network,
             self._nstops,
-            self._nbuses,
             self._min_headway,
             self._max_headway,
             self._speed,
