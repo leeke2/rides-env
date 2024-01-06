@@ -35,6 +35,7 @@ class LSSDPInstance:
         demand: npt.NDArray[np.floating],
         nbuses: int,
         capacity: float,
+        congested: bool,
         base_ttd: npt.NDArray[np.floating] = np.array([]),
         base_flow: npt.NDArray[np.floating] = np.array([]),
         base_obj: float = 0.0,
@@ -45,6 +46,7 @@ class LSSDPInstance:
         self.demand = demand
         self.nbuses = nbuses
         self.capacity = capacity
+        self.congested = congested
         self.base_ttd = base_ttd
         self.base_flow = base_flow
         self.base_obj = base_obj
@@ -154,12 +156,18 @@ class LSSDPInstance:
         self._id = h.hexdigest()[:10]
 
     def print_summary(self) -> None:
+        if self.congested:
+            congested_str = "\033[32mTrue\033[0m"
+        else:
+            congested_str = "\033[31mFalse\033[0m"
+
         print(
             f"  Instance  : {self._id}\n"
             f"  Name      : {self.name}\n"
             f"  Buses     : {self.nbuses}\n"
             f"  Stops     : {self.travel_time.shape[0]}\n"
             f"  Capacity  : {self.capacity}\n"
+            f"  Congested : {congested_str}\n"
             f"  Objective : {self.base_obj:.4f}\n"
         )
 
@@ -177,7 +185,10 @@ class LSSDPInstance:
                 *calculate_stats(self.travel_time, sum=False),
                 *calculate_stats(self.base_ttd),
                 *calculate_stats(
-                    self.base_flow / self.nbuses / self.capacity * 100, sum=False
+                    self.base_flow / self.nbuses / self.capacity * 100
+                    if self.congested
+                    else [float("nan")],
+                    sum=False,
                 ),
             )
         )
@@ -212,6 +223,7 @@ class LSSDPInstance:
         demand_npeaks_max: int,
         demand_peak_conc: float,
         demand_peak_size: float,
+        congested: bool,
         capacity: float,
         max_od_demand: float,
         truncate: bool,
@@ -273,6 +285,7 @@ class LSSDPInstance:
             demand=demand.astype(np.float32),
             nbuses=inst_nbuses,
             capacity=capacity,
+            congested=congested,
         )
 
         # Calculate objective
@@ -282,14 +295,23 @@ class LSSDPInstance:
         #     travel_time,
         #     demand,
         # )
-        out = mat_linear_congested_assign(
-            [inst.ass_stops.stops],
-            [1 / inst.ass_trip_time * inst_nbuses],
-            travel_time,
-            demand,
-            capacity,
-            max_iters=max_iters,
-        )
+
+        if congested:
+            out = mat_linear_congested_assign(
+                [inst.ass_stops.stops],
+                [1 / inst.ass_trip_time * inst_nbuses],
+                travel_time,
+                demand,
+                capacity,
+                max_iters=max_iters,
+            )
+        else:
+            out = mat_linear_assign(
+                [inst.ass_stops.stops],
+                [1 / inst.ass_trip_time * inst_nbuses],
+                travel_time,
+                demand,
+            )
 
         inst.base_ttd = np.asarray(out[0], dtype=np.float32)
         inst.base_flow = np.asarray(out[1], dtype=np.float32)
@@ -350,8 +372,12 @@ class LSSDPSolution:
 
         return {
             "ttd": calculate_stats(self._ttd),
-            "lf": calculate_stats(np.divide(self._flow, self._capacities)),
             "per_flow_exp": per_flow_exp,
+            "lf": calculate_stats(
+                np.divide(self._flow, self._capacities)
+                if self._inst.congested
+                else [float("nan")]
+            ),
         }
 
     def terminate(self) -> None:
@@ -380,14 +406,22 @@ class LSSDPSolution:
             1.0 / self._inst.trip_time(self._lss.stops) * self._lss.nbuses,
         ]
 
-        out = mat_linear_congested_assign(
-            alignments,
-            frequencies,
-            self._inst.travel_time,
-            self._inst.demand,
-            self._inst.capacity,
-            max_iters=self._inst.max_iters,
-        )
+        if self._inst.congested:
+            out = mat_linear_congested_assign(
+                alignments,
+                frequencies,
+                self._inst.travel_time,
+                self._inst.demand,
+                self._inst.capacity,
+                max_iters=self._inst.max_iters,
+            )
+        else:
+            out = mat_linear_assign(
+                alignments,
+                frequencies,
+                self._inst.travel_time,
+                self._inst.demand,
+            )
 
         self._prev_obj = self._obj
         self._obj = out[2] / self._inst.base_obj

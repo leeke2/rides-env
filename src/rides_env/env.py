@@ -58,6 +58,7 @@ class RidesEnv(Env):
         nbuses_full_min: int = 1,
         truncate: bool = True,
         capacity: int | None = 90,
+        congested: bool = True,
         speed: Annotated[float, "kmh"] = 17.0,
         dwell_time: Annotated[float, "min"] = 0.5,
         allow_retrospect: bool = False,
@@ -74,6 +75,7 @@ class RidesEnv(Env):
         self._truncate = truncate
         self._speed = speed
         self._dwell_time = dwell_time
+        self._congested = congested
         self._capacity = capacity
         self._allow_retrospect = allow_retrospect
 
@@ -391,6 +393,7 @@ class RidesEnv(Env):
             self._demand_npeaks_max,
             self._demand_peak_conc,
             self._demand_peak_size,
+            self._congested,
             self._capacity,
             self._max_od_demand,
             self._truncate,
