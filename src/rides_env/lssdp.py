@@ -258,7 +258,7 @@ class LSSDPInstance:
         demand = rng.random(size=(inst_nstops, inst_nstops))
 
         if demand_npeaks_max > 1:
-            for _ in range(rng.integers(1, high=demand_npeaks_max)):
+            for _ in range(rng.integers(1, high=demand_npeaks_max + 1)):
                 mean = sorted(rng.integers(1, high=inst_nstops + 1, size=(2,)))
                 var = np.diag(
                     rng.random(size=(2,))
