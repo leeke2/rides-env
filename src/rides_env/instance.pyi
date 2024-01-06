@@ -16,6 +16,7 @@ class LSSDPInstance:
     base_obj: float
     max_iters: int
     name: str | None
+    _oris: AllStopService
     def __init__(
         self,
         travel_time: npt.NDArray[np.floating],
