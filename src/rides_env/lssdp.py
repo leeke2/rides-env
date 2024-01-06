@@ -173,6 +173,7 @@ class LSSDPInstance:
             f"  Name      : {self.name}\n"
             f"  Buses     : {self.nbuses}\n"
             f"  Stops     : {self.travel_time.shape[0]}\n"
+            f"  Headway   : {(self.ass_trip_time / self.nbuses):.1f} min\n"
             f"  Capacity  : {self.capacity}\n"
             f"  Congested : {congested_str}\n"
             f"  Objective : {self.base_obj:.4f}\n"
