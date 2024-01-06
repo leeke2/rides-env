@@ -12,6 +12,8 @@ from .network import SGNetwork
 from math import ceil, floor
 
 
+def trip_time(travel_time: npt.NDArray, stops: StopSequence) -> float:
+    return sum(travel_time[from_][to_] for from_, to_ in zip(stops[:-1], stops[1:]))
 
 
 def calculate_stats(
@@ -210,13 +212,7 @@ class LSSDPInstance:
     # @cached_property
     @property
     def ass_trip_time(self) -> float:
-        return self.trip_time(self.ass_stops)
-
-    # @cache
-    def trip_time(self, stops: StopSequence) -> float:
-        return sum(
-            self.travel_time[from_][to_] for from_, to_ in zip(stops[:-1], stops[1:])
-        )
+        return trip_time(self.travel_time, self.ass_stops)
 
     @staticmethod
     def from_network(
@@ -407,7 +403,7 @@ class LSSDPSolution:
         alignments = [self._inst.ass_stops.stops, self._lss.stops.stops]
         frequencies = [
             1.0 / self._inst.ass_trip_time * (self._inst.nbuses - self._lss.nbuses),
-            1.0 / self._inst.trip_time(self._lss.stops) * self._lss.nbuses,
+            1.0 / trip_time(self._inst.travel_time, self._lss.stops) * self._lss.nbuses,
         ]
 
         if self._inst.congested:
