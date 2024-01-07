@@ -352,10 +352,13 @@ class RidesEnv(Env):
 
     @property
     def _action_mask(self):
-        mask = np.ones(self._nactions, dtype=np.bool_)
+        mask = np.zeros(self._nactions, dtype=np.bool_)
 
+        mask[0] = True
         mask[1 : 1 + self._inst.nstops] = ~np.array(self._sol._lss.stops_binary)
-        mask[-1] = self._sol._lss.nbuses < self._inst.nbuses - self._nbuses_full_min
+
+        if self._sol._lss.is_valid():
+            mask[-1] = self._sol._lss.nbuses < self._inst.nbuses - self._nbuses_full_min
 
         return mask
 
@@ -423,13 +426,18 @@ class RidesEnv(Env):
             return True
 
         if action == self._add_bus_action:
+            if not self._sol._lss.is_valid():
+                raise ValueError(
+                    "Cannot increase LSS allocation before having valid LSS"
+                )
+
             if self._sol._lss.nbuses >= self._inst.nbuses - self._nbuses_full_min:
                 raise ValueError("Allocation to limited stop service exceeded limit")
 
             self._sol.add_bus()
             return False
 
-        if action - 1 > self._inst.nstops:
+        if action - 1 >= self._inst.nstops:
             raise ValueError("Invalid action")
 
         if self._sol._lss.is_serving(action - 1):
