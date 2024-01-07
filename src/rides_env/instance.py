@@ -46,8 +46,9 @@ class LSSDPInstance:
 
         import matplotlib as mpl
         import matplotlib.pyplot as plt
-        from mpl_toolkits.axes_grid1.axes_divider import \
-            make_axes_locatable  # type: ignore
+        from mpl_toolkits.axes_grid1.axes_divider import (
+            make_axes_locatable,
+        )  # type: ignore
 
         def nanlower(arr):
             arr[np.tril_indices(arr.shape[0])] = np.nan
