@@ -91,23 +91,29 @@ class RidesEnv(Env):
 
         self._network = SGNetwork()
 
-        _mat = lambda high: spaces.Box(
-            0.0, high, shape=(self._nstops_max, self._nstops_max)
+        _mat = lambda: spaces.Box(
+            0.0, float("inf"), shape=(self._nstops_max, self._nstops_max)
         )
         _oh = lambda size: spaces.MultiDiscrete([2] * size)
 
         self.observation_space = spaces.Dict(
             {
-                "od_demand": _mat(10.0),
-                "stops_exp": _oh(self._nstops_max),
-                "nbuses_exp": spaces.Discrete(
+                # Instance
+                "od_demand": _mat(),
+                "link_travel_time": _mat(),
+                "base_od_travel_time": _mat(),
+                # Solution
+                "stops_lss": _oh(self._nstops_max),
+                "nbuses_lss": spaces.Discrete(
                     100,
                     start=self._nbuses_full_min,
                 ),
-                "link_travel_time": _mat(120.0),
-                "od_initial_travel_time": _mat(120.0),
-                "od_travel_time": _mat(240.0),
-                "od_relative_travel_time": _mat(10.0),
+                # Metric
+                "od_travel_time": _mat(),
+                "base_invehicle_flow": _mat(),
+                "invehicle_flow_ass": _mat(),
+                "invehicle_flow_lss": _mat(),
+                # Mask
                 "action_mask": _oh(self._nactions),
             }
         )
@@ -330,13 +336,21 @@ class RidesEnv(Env):
         pad = self._pad
 
         return {
+            # Instance
             "od_demand": pad(self._inst.demand),
-            "stops_exp": pad(np.asarray(self._sol._lss.stops_binary)),
-            "nbuses_exp": self._sol._lss.nbuses,
             "link_travel_time": pad(self._inst.travel_time),
-            "od_initial_travel_time": pad(self._inst.base_ttd),
+            "base_od_travel_time": pad(self._inst.base_ttd),
+            # Solution
+            "stops_lss": pad(np.asarray(self._sol._lss.stops_binary)),
+            "nbuses_lss": self._sol._lss.nbuses,
+            # Metric
             "od_travel_time": pad(self._sol._ttd),
-            "od_relative_travel_time": pad(self._sol._rel_ttd),
+            "base_invehicle_flow": pad(
+                self._sol._ass.convert_invehicle_flow_to_mat(self._inst.base_flow)
+            ),
+            "invehicle_flow_ass": pad(self._sol._ass_flow_mat),
+            "invehicle_flow_lss": pad(self._sol._lss_flow_mat),
+            # Mask
             "action_mask": self._action_mask,
         }
 

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from dataclasses import dataclass
 
 import numpy.typing as npt
+import numpy as np
 
 # @dataclass
 # class StopSequence:
@@ -33,6 +34,10 @@ class Service(ABC):
     def stops(self) -> list[int]:
         raise NotImplementedError()
 
+    @abstractproperty
+    def _invehicle_flow_indices(self) -> list[int]:
+        raise NotImplementedError()
+
     @property
     def nbuses(self) -> int:
         return self._nbuses
@@ -61,11 +66,25 @@ class Service(ABC):
         return len(self.stops)
 
     def is_valid(self) -> bool:
-        return len(self.stops) >= 2 and self.nbuses >= 1
+        return self.nstops >= 2 and self.nbuses >= 1
 
     @abstractmethod
     def is_serving(self, stop: int) -> bool:
         raise NotImplementedError()
+
+    def convert_invehicle_flow_to_mat(
+        self, flow: npt.NDArray[np.floating]
+    ) -> npt.NDArray[np.floating]:
+        if not self.is_valid():
+            return np.array([[0.0]], dtype=np.float32)
+
+        nstops = self.stops[-1] + 1
+        out = np.zeros((nstops, nstops), dtype=flow.dtype)
+        values = flow[self._invehicle_flow_indices]
+        indices = np.array(self.stops[:-1]) * nstops + np.array(self.stops[1:])
+        out.put(indices, values)
+
+        return out
 
 
 class AllStopService(Service):
@@ -86,6 +105,10 @@ class AllStopService(Service):
 
     def remove_bus(self) -> None:
         self._nbuses -= 1
+
+    @property
+    def _invehicle_flow_indices(self) -> list[int]:
+        return list(range(1, (self.nstops - 1) * 3, 3))
 
 
 class LimitedStopService(Service):
@@ -124,3 +147,7 @@ class LimitedStopService(Service):
                     if self._stops_binary[i]:
                         self._last_stop = i
                         break
+
+    @property
+    def _invehicle_flow_indices(self) -> list[int]:
+        return [self._nstops + i for i in range(1, (self.nstops - 1) * 3, 3)]

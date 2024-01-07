@@ -22,6 +22,14 @@ class LSSDPSolution:
         self._flow = inst.base_flow
 
     @property
+    def _ass_flow_mat(self) -> npt.NDArray[np.floating]:
+        return self._ass.convert_invehicle_flow_to_mat(self._flow)
+
+    @property
+    def _lss_flow_mat(self) -> npt.NDArray[np.floating]:
+        return self._lss.convert_invehicle_flow_to_mat(self._flow)
+
+    @property
     def _capacities(self) -> npt.NDArray[np.floating]:
         if not self._lss.is_valid():
             return np.array([self._inst._oris.max_load] * 3 * (self._inst.nstops - 1))
