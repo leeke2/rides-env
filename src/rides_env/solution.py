@@ -20,7 +20,6 @@ class LSSDPSolution:
         self._obj = 1.0
         self._ttd = inst.base_ttd
         self._flow = inst.base_flow
-        self._rel_ttd = np.triu(np.ones_like(self._ttd), 1)
 
     @property
     def _capacities(self) -> npt.NDArray[np.floating]:
@@ -70,7 +69,6 @@ class LSSDPSolution:
             self._prev_obj = self._obj
             self._obj = 1.0
             self._ttd = self._inst.base_ttd
-            self._rel_ttd = np.triu(np.ones_like(self._ttd), 1)
 
             return
 
@@ -98,9 +96,3 @@ class LSSDPSolution:
         self._obj = out[2] / self._inst.base_obj
         self._ttd = np.asarray(out[0], dtype=np.float32)
         self._flow = np.asarray(out[1], dtype=np.float32)
-        self._rel_ttd = np.divide(
-            self._ttd,
-            self._inst.base_ttd,
-            out=np.zeros_like(self._inst.base_ttd),
-            where=(self._inst.base_ttd != 0),
-        )

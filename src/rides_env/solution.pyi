@@ -15,7 +15,6 @@ class LSSDPSolution:
     _prev_obj: float
     _ttd: npt.NDArray[np.floating]
     _flow: npt.NDArray[np.floating]
-    _rel_ttd: npt.NDArray[np.floating]
     def __init__(self, inst: LSSDPInstance) -> None: ...
     @property
     def stats(
