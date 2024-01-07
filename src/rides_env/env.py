@@ -113,8 +113,6 @@ class RidesEnv(Env):
                 "base_invehicle_flow": _mat(),
                 "invehicle_flow_ass": _mat(),
                 "invehicle_flow_lss": _mat(),
-                # Mask
-                "action_mask": _oh(self._nactions),
             }
         )
 
@@ -350,8 +348,6 @@ class RidesEnv(Env):
             ),
             "invehicle_flow_ass": pad(self._sol._ass_flow_mat),
             "invehicle_flow_lss": pad(self._sol._lss_flow_mat),
-            # Mask
-            "action_mask": self._action_mask,
         }
 
     @property
@@ -365,7 +361,11 @@ class RidesEnv(Env):
 
     @property
     def _info(self) -> dict[str, Any]:
-        return {"nstops": self._inst.nstops, "nbuses": self._inst.nbuses}
+        return {
+            "nstops": self._inst.nstops,
+            "nbuses": self._inst.nbuses,
+            "action_mask": self._action_mask,
+        }
 
     @property
     def _nstops_max(self) -> int:
