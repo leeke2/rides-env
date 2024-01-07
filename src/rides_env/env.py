@@ -1,5 +1,6 @@
 from typing import Annotated, Any
 
+import random
 import gymnasium as gym
 import numpy as np
 import numpy.typing as npt
@@ -282,6 +283,16 @@ class RidesEnv(Env):
                 f"{div}\n  #  Objective     Reward                   "
                 f"LF                  TTD    % Exp  🚌  Alignment\n{div}"
             )
+
+        # Randomly pick an action
+        action = random.choice(
+            [
+                i
+                for i, ok in enumerate(self._action_mask)
+                if ok and i != 0 and i != self._nactions - 1
+            ]
+        )
+        self.step(action)
 
         return self._observation, self._info
 
