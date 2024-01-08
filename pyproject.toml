@@ -13,11 +13,12 @@ classifiers = [
     "Topic :: Software Development :: Libraries"
 ]
 dependencies = [
-    "gymnasium ~= 0.29.1",
-    "numpy ~= 1.26.2",
-    "tram ~= 0.1.8",
-    "scipy ~= 1.11.4",
-    "geopandas ~= 0.14.1",
-    "shapely ~= 2.0.2"
+    "gymnasium >= 0.29.1",
+    "numpy >= 1.24.0",
+    "tram >= 0.1.8",
+    "scipy >= 1.10.0",
+
+    "geopandas >= 0.13.0",
+    "shapely >= 2.0.0"
 ]
 readme = "README.md"
