@@ -211,11 +211,12 @@ class RidesEnv(Env):
                 f" {ttd_mean:8.4f} / {ttd_max:8.4f} "
                 f" {per_flow_exp: 6.4f} "
                 f" {self._sol._lss.nbuses:3d} "
+                f" {action:3d} "
                 f" {alignment}"
             )
 
             if terminated:
-                print("-" * 137)
+                print("-" * 142)
 
         self._step += 1
 
@@ -278,10 +279,10 @@ class RidesEnv(Env):
             print(f"  Env       : {spec_id}\n")
             self._inst.print_summary()
 
-            div = "-" * 137
+            div = "-" * 142
             print(
                 f"{div}\n  #  Objective     Reward                   "
-                f"LF                  TTD    % Exp  🚌  Alignment\n{div}"
+                f"LF                  TTD    % Exp  🚌  Act  Alignment\n{div}"
             )
 
         # Randomly pick an action
@@ -292,7 +293,6 @@ class RidesEnv(Env):
                 if ok and i != 0 and i != self._nactions - 1
             ]
         )
-        self.step(action)
 
         return self._observation, self._info
 
