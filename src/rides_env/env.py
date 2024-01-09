@@ -286,15 +286,6 @@ class RidesEnv(Env):
                 f"LF                  TTD    % Exp  🚌  Act  Alignment\n{div}"
             )
 
-        # Randomly pick an action
-        action = random.choice(
-            [
-                i
-                for i, ok in enumerate(self._action_mask)
-                if ok and i != 0 and i != self._nactions - 1
-            ]
-        )
-
         return self._observation, self._info
 
     def render(self):  # type: ignore
