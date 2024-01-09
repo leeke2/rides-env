@@ -186,7 +186,8 @@ class RidesEnv(Env):
         if self.render_mode == "human":
             alignment = "".join(
                 [
-                    ("●" if selected else "○") + (" " if i % 5 == 0 and i != 0 else "")
+                    ("●" if selected else "○")
+                    + (" " if (i + 1) % 5 == 0 and i != 0 else "")
                     for i, selected in enumerate(self._sol._lss.stops_binary)
                 ]
             )
