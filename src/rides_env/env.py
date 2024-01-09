@@ -366,7 +366,11 @@ class RidesEnv(Env):
         mask = np.zeros(self._nactions, dtype=np.bool_)
 
         mask[0] = True
-        mask[1 : 1 + self._inst.nstops] = ~np.array(self._sol._lss.stops_binary)
+
+        if self._allow_retrospect:
+            mask[1 : 1 + self._inst.nstops] = ~np.array(self._sol._lss.stops_binary)
+        else:
+            mask[2 + self._sol._lss.last_stop : 1 + self._inst.nstops] = True
 
         if self._sol._lss.is_valid():
             mask[-1] = self._sol._lss.nbuses < self._inst.nbuses - self._nbuses_full_min

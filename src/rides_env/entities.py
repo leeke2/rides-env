@@ -142,11 +142,11 @@ class LimitedStopService(Service):
                 self._last_stop = stop
             elif sum(self._stops_binary) == 0:
                 self._last_stop = -1
-            else:
-                for i in range(self._last_stop, -1, -1):
-                    if self._stops_binary[i]:
-                        self._last_stop = i
-                        break
+        else:
+            for i in range(self._last_stop, -1, -1):
+                if self._stops_binary[i]:
+                    self._last_stop = i
+                    break
 
     @property
     def _invehicle_flow_indices(self) -> list[int]:
