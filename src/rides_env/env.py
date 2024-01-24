@@ -375,6 +375,7 @@ class RidesEnv(Env):
             "nstops": self._inst.nstops,
             "nbuses": self._inst.nbuses,
             "action_mask": self._action_mask,
+            "capacity": self._inst.capacity,
         }
 
     @property
