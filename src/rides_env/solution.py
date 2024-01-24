@@ -72,6 +72,11 @@ class LSSDPSolution:
         self._lss.add_bus()
         self._calculate_objective()
 
+    def remove_bus(self) -> None:
+        self._ass.add_bus()
+        self._lss.remove_bus()
+        self._calculate_objective()
+
     def _calculate_objective(self) -> None:
         if not self._lss.is_valid():
             self._prev_obj = self._obj

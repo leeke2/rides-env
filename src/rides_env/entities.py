@@ -86,6 +86,12 @@ class Service(ABC):
 
         return out
 
+    def remove_bus(self) -> None:
+        self._nbuses -= 1
+
+    def add_bus(self) -> None:
+        self._nbuses += 1
+
 
 class AllStopService(Service):
     def __init__(self, *args, **kwargs):
@@ -102,9 +108,6 @@ class AllStopService(Service):
 
     def not_serving_any_stops(self) -> bool:
         return False
-
-    def remove_bus(self) -> None:
-        self._nbuses -= 1
 
     @property
     def _invehicle_flow_indices(self) -> list[int]:
@@ -130,9 +133,6 @@ class LimitedStopService(Service):
 
     def not_serving_any_stops(self) -> bool:
         return sum(self._stops_binary) == 0
-
-    def add_bus(self) -> None:
-        self._nbuses += 1
 
     def toggle(self, stop: int) -> None:
         self._stops_binary[stop] = False if self._stops_binary[stop] else True
