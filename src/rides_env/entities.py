@@ -79,7 +79,7 @@ class Service(ABC):
             return np.array([[0.0]], dtype=np.float32)
 
         nstops = self.stops[-1] + 1
-        out = np.zeros((nstops, nstops), dtype=flow.dtype)
+        out = np.zeros((nstops, nstops), dtype=np.float32)
         values = flow[self._invehicle_flow_indices]
         indices = np.array(self.stops[:-1]) * nstops + np.array(self.stops[1:])
         out.put(indices, values)
