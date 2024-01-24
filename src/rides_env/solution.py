@@ -22,6 +22,30 @@ class LSSDPSolution:
         self._flow = inst.base_flow
 
     @property
+    def _lf(self) -> npt.NDArray[np.floating]:
+        return (
+            np.divide(self._flow, self._capacities)
+            if self._inst.congested
+            else np.array([float("nan")], dtype=np.float32)
+        )
+
+    @property
+    def _ass_load_factor(self) -> npt.NDArray[np.floating]:
+        return (
+            self._ass.convert_invehicle_flow_to_mat(self._lf)
+            if self._inst.congested
+            else np.array([float("nan")], dtype=np.float32)
+        )
+
+    @property
+    def _lss_load_factor(self) -> npt.NDArray[np.floating]:
+        return (
+            self._lss.convert_invehicle_flow_to_mat(self._lf)
+            if self._inst.congested
+            else np.array([float("nan")], dtype=np.float32)
+        )
+
+    @property
     def _ass_flow_mat(self) -> npt.NDArray[np.floating]:
         return self._ass.convert_invehicle_flow_to_mat(self._flow)
 
@@ -52,11 +76,7 @@ class LSSDPSolution:
 
         return {
             "ttd": calculate_stats(self._ttd),
-            "lf": calculate_stats(
-                np.divide(self._flow, self._capacities)
-                if self._inst.congested
-                else [float("nan")]
-            ),
+            "lf": calculate_stats(self._lf),
             "per_flow_exp": calculate_stats([per_flow_exp]),
         }
 

@@ -114,6 +114,11 @@ class RidesEnv(Env):
                 "base_invehicle_flow": _mat(),
                 "invehicle_flow_ass": _mat(),
                 "invehicle_flow_lss": _mat(),
+                **(
+                    {"load_factor_ass": _mat(), "load_factor_lss": _mat()}
+                    if self._congested
+                    else {}
+                ),
             }
         )
 
@@ -336,7 +341,7 @@ class RidesEnv(Env):
     def _observation(self) -> ObsType:
         pad = self._pad
 
-        return {
+        out = {
             # Instance
             "od_demand": pad(self._inst.demand),
             "link_travel_time": pad(self._inst.travel_time),
@@ -352,6 +357,15 @@ class RidesEnv(Env):
             "invehicle_flow_ass": pad(self._sol._ass_flow_mat),
             "invehicle_flow_lss": pad(self._sol._lss_flow_mat),
         }
+
+        if self._congested:
+            return {
+                **out,
+                "load_factor_ass": pad(self._sol._ass_load_factor),
+                "load_factor_lss": pad(self._sol._lss_load_factor),
+            }
+
+        return out
 
     @property
     def _action_mask(self):
