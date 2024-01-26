@@ -192,6 +192,7 @@ class LSSDPInstance:
         nstops: int | list[int],
         min_headway: float,
         max_headway: float,
+        nbuses_full_min: int,
         speed: Annotated[float, "kmh"],
         dwell_time: Annotated[float, "min"],
         demand_npeaks_max: int,
@@ -219,9 +220,19 @@ class LSSDPInstance:
         inst_nstops = travel_time.shape[0]
 
         ass_trip_time = trip_time(travel_time, list(range(inst_nstops)))
+
+        min_nbuses = ceil(ass_trip_time / max_headway)
+        max_nbuses = floor(ass_trip_time / min_headway) + 1
+
+        if min_nbuses < nbuses_full_min + 1:
+            min_nbuses = nbuses_full_min + 1
+
+        if max_nbuses <= min_nbuses:
+            max_nbuses = min_nbuses + 1
+
         inst_nbuses = rng.integers(
-            ceil(ass_trip_time / max_headway),
-            high=floor(ass_trip_time / min_headway) + 1,
+            min_nbuses,
+            high=max_nbuses,
         )
 
         # Generate demand matrix

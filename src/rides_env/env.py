@@ -424,6 +424,7 @@ class RidesEnv(Env):
             self._nstops,
             self._min_headway,
             self._max_headway,
+            self._nbuses_full_min,
             self._speed,
             self._dwell_time,
             self._demand_npeaks_max,
