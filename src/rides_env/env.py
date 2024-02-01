@@ -95,7 +95,7 @@ class RidesEnv(Env):
         _mat = lambda: spaces.Box(
             0.0, float("inf"), shape=(self._nstops_max, self._nstops_max)
         )
-        _oh = lambda size: spaces.MultiDiscrete([2] * size)
+        _oh = lambda size: spaces.Box(0, 1, (size,), dtype=bool)
 
         self.observation_space = spaces.Dict(
             {
