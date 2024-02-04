@@ -390,6 +390,7 @@ class RidesEnv(Env):
             "nbuses": self._inst.nbuses,
             "action_mask": self._action_mask,
             "capacity": self._inst.capacity,
+            "objective": self._sol._obj,
         }
 
     @property
