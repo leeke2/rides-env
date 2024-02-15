@@ -271,6 +271,7 @@ class LSSDPInstance:
             nbuses=inst_nbuses,
             capacity=capacity,
             congested=congested,
+            max_iters=max_iters,
         )
 
         # Calculate objective
