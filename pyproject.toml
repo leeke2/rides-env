@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "rides-env"
-version = "0.1.11"
+version = "0.1.12"
 description = ""
 requires-python = ">=3.8"
 classifiers = [
@@ -15,7 +15,7 @@ classifiers = [
 dependencies = [
     "gymnasium >= 0.29.1",
     "numpy >= 1.24.0",
-    "tram >= 0.1.8",
+    "tram >= 0.1.9",
     "scipy >= 1.10.0",
 
     "geopandas >= 0.13.0",
