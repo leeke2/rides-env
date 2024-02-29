@@ -259,13 +259,15 @@ class LSSDPInstance:
         demand = np.triu(demand, 1)
         demand /= inst_nstops + 1 - np.arange(inst_nstops).reshape(-1, 1)
         demand /= np.sum(demand)
-        demand *= (
-            inst_nbuses
-            / ass_trip_time
-            * capacity
-            * demand_factor
-            * (rng.random() * 0.8 + 0.2)
-        )
+
+        if congested and capacity is not None:
+            demand *= (
+                inst_nbuses
+                / ass_trip_time
+                * capacity
+                * demand_factor
+                * (rng.random() * 0.8 + 0.2)
+            )
 
         inst = LSSDPInstance(
             travel_time=travel_time.astype(np.float32),
