@@ -68,7 +68,7 @@ class RidesEnv(Env):
         demand_npeaks_max: int = 50,
         demand_peak_conc: float = 2.0,
         demnad_peak_size: float = 150.0,
-        demand_factor: float = 1.25,
+        demand_factor: float = 2.5,
         max_iters: int = 10000,
         render_mode: str | None = None,
     ):

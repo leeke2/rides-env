@@ -174,9 +174,11 @@ class LSSDPInstance:
                 *calculate_stats(self.travel_time, sum=False),
                 *calculate_stats(self.base_ttd),
                 *calculate_stats(
-                    (self.base_flow / (self._oris.frequency * self.capacity) * 100)
-                    if self.congested
-                    else [float("nan")],
+                    (
+                        (self.base_flow / (self._oris.frequency * self.capacity) * 100)
+                        if self.congested
+                        else [float("nan")]
+                    ),
                     sum=False,
                 ),
             )
@@ -262,7 +264,7 @@ class LSSDPInstance:
             / ass_trip_time
             * capacity
             * demand_factor
-            * (rng.random() * 0.5 + 0.5)
+            * (rng.random() * 0.8 + 0.2)
         )
 
         inst = LSSDPInstance(
