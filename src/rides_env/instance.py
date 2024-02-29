@@ -257,10 +257,10 @@ class LSSDPInstance:
                 demand += rng.random() * rv.pdf(pos) * demand_peak_size
 
         demand = np.triu(demand, 1)
-        demand /= inst_nstops + 1 - np.arange(inst_nstops).reshape(-1, 1)
-        demand /= np.sum(demand)
 
-        if congested and capacity is not None:
+        if congested:
+            demand /= inst_nstops + 1 - np.arange(inst_nstops).reshape(-1, 1)
+            demand /= np.sum(demand)
             demand *= (
                 inst_nbuses
                 / ass_trip_time
@@ -268,6 +268,8 @@ class LSSDPInstance:
                 * demand_factor
                 * (rng.random() * 0.8 + 0.2)
             )
+        else:
+            demand /= np.max(demand)
 
         inst = LSSDPInstance(
             travel_time=travel_time.astype(np.float32),
