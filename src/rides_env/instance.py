@@ -265,7 +265,7 @@ class LSSDPInstance:
                 inst_nbuses
                 / ass_trip_time
                 * capacity
-                * demand_factor
+                * (rng.random() * demand_factor * (4 - 1 / 4) + demand_factor / 4)
                 * (rng.random() * 0.8 + 0.2)
             )
         else:
