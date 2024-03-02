@@ -66,7 +66,7 @@ class RidesEnv(Env):
         dwell_time: Annotated[float, "min"] = 0.5,
         allow_retrospect: bool = False,
         demand_npeaks_max: int = 50,
-        demand_peak_conc: float = 2.0,
+        demand_peak_conc: float = 1.0,
         demnad_peak_size: float = 150.0,
         demand_factor: float = 1.25,
         max_iters: int = 10000,
