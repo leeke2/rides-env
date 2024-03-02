@@ -243,12 +243,7 @@ class LSSDPInstance:
         if demand_npeaks_max > 1:
             for _ in range(rng.integers(1, high=demand_npeaks_max + 1)):
                 mean = sorted(rng.integers(1, high=inst_nstops + 1, size=(2,)))
-                var = np.diag(
-                    rng.random(size=(2,))
-                    * inst_nstops
-                    / rng.random()
-                    / demand_peak_conc
-                )
+                var = np.diag(rng.random(size=(2,)) * inst_nstops / demand_peak_conc)
 
                 x, y = np.mgrid[1 : inst_nstops + 1, 1 : inst_nstops + 1]
                 pos = np.dstack((x, y))
