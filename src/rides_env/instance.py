@@ -232,10 +232,12 @@ class LSSDPInstance:
         if max_nbuses <= min_nbuses:
             max_nbuses = min_nbuses + 1
 
-        inst_nbuses = rng.integers(
-            min_nbuses,
-            high=max_nbuses,
-        )
+        # inst_nbuses = rng.integers(
+        #     min_nbuses,
+        #     high=max_nbuses,
+        # )
+
+        inst_nbuses = rng.integers(10, high=16)
 
         # Generate demand matrix
         demand = rng.random(size=(inst_nstops, inst_nstops))
