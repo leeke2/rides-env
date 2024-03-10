@@ -5,6 +5,7 @@ from typing import Annotated
 import numpy as np
 import numpy.typing as npt
 from scipy.stats import multivariate_normal  # type: ignore
+
 from tram import mat_linear_assign, mat_linear_congested_assign
 
 from .entities import AllStopService
@@ -15,6 +16,7 @@ from .utils import calculate_stats, trip_time
 class LSSDPInstance:
     def __init__(
         self,
+        stops: list[str],
         travel_time: npt.NDArray[np.floating],
         demand: npt.NDArray[np.floating],
         nbuses: int,
@@ -26,6 +28,7 @@ class LSSDPInstance:
         max_iters: int = 10000,
         name: str | None = None,
     ):
+        self.stops = stops
         self.travel_time = travel_time
         self.demand = demand
         self.nbuses = nbuses
@@ -210,11 +213,11 @@ class LSSDPInstance:
         # Generate travel time matrix
         # _, distance, info = network.sample_test_route()
         if isinstance(nstops, int):
-            _, distance, info = network.sample_real_route(
+            stops, distance, info = network.sample_real_route(
                 nstops, truncate=truncate, rng=rng
             )
         elif isinstance(nstops, list):
-            _, distance, info = network.sample_real_route(
+            stops, distance, info = network.sample_real_route(
                 nstops[0], max_num_nodes=nstops[1], truncate=truncate, rng=rng
             )
 
@@ -269,6 +272,7 @@ class LSSDPInstance:
             demand /= np.max(demand)
 
         inst = LSSDPInstance(
+            stop=stops,
             travel_time=travel_time.astype(np.float32),
             demand=demand.astype(np.float32),
             nbuses=inst_nbuses,
