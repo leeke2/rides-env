@@ -49,9 +49,8 @@ class LSSDPInstance:
 
         import matplotlib as mpl
         import matplotlib.pyplot as plt
-        from mpl_toolkits.axes_grid1.axes_divider import (
-            make_axes_locatable,
-        )  # type: ignore
+        from mpl_toolkits.axes_grid1.axes_divider import \
+            make_axes_locatable  # type: ignore
 
         def nanlower(arr):
             arr[np.tril_indices(arr.shape[0])] = np.nan
@@ -272,7 +271,7 @@ class LSSDPInstance:
             demand /= np.max(demand)
 
         inst = LSSDPInstance(
-            stop=stops,
+            stops=stops,
             travel_time=travel_time.astype(np.float32),
             demand=demand.astype(np.float32),
             nbuses=inst_nbuses,
